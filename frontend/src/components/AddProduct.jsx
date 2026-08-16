@@ -1,54 +1,44 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useContext } from "react";
+import API from "../services/api";
+import { AuthContext } from "../context/AuthContext";
 
 const AddProduct = ({ onClose, onSuccess }) => {
+    const { user } = useContext(AuthContext);
 
-    // ------------------------------------
-    // Product form state
-    // ------------------------------------
+    // =====================================================
+    // PRODUCT FORM
+    // =====================================================
 
     const [formData, setFormData] = useState({
         name: "",
-        category: "Electronics",
+        categoryId: "",
         description: "",
         mrp: "",
-        sellingPrice: "",
+        basePrice: "",
         stock: "",
         gstRate: "18"
     });
 
-
-    // ------------------------------------
-    // Uploaded files
-    // ------------------------------------
+    // =====================================================
+    // IMAGES
+    // =====================================================
 
     const [files, setFiles] = useState([]);
-
-
-    // ------------------------------------
-    // Image previews
-    // ------------------------------------
-
     const [previews, setPreviews] = useState([]);
 
-
-    // ------------------------------------
-    // Loading / error / success
-    // ------------------------------------
+    // =====================================================
+    // UI STATES
+    // =====================================================
 
     const [loading, setLoading] = useState(false);
-
     const [error, setError] = useState("");
-
     const [success, setSuccess] = useState("");
 
-
-    // ------------------------------------
-    // Handle text fields
-    // ------------------------------------
+    // =====================================================
+    // HANDLE INPUT CHANGE
+    // =====================================================
 
     const handleChange = (e) => {
-
         const { name, value } = e.target;
 
         setFormData((previous) => ({
@@ -56,349 +46,334 @@ const AddProduct = ({ onClose, onSuccess }) => {
             [name]: value
         }));
 
+        setError("");
+        setSuccess("");
     };
 
-
-    // ------------------------------------
-    // Handle image selection
-    // ------------------------------------
+    // =====================================================
+    // IMAGE SELECTION
+    // =====================================================
 
     const handleImageChange = (e) => {
-
-        const selectedFiles =
-            Array.from(e.target.files || []);
-
+        const selectedFiles = Array.from(e.target.files || []);
 
         setError("");
-
+        setSuccess("");
 
         if (selectedFiles.length === 0) {
             return;
         }
 
-
-        // Maximum 8 images
-        if (selectedFiles.length > 8) {
-
-            setError(
-                "You can upload a maximum of 8 images."
-            );
-
+        // Minimum 4 images
+        if (selectedFiles.length < 4) {
+            setError("Please select at least 4 product images.");
             return;
         }
 
+        // Maximum 8 images
+        if (selectedFiles.length > 8) {
+            setError("You can upload a maximum of 8 product images.");
+            return;
+        }
 
-        // Validate every file
+        // Validate each image
         for (const file of selectedFiles) {
-
             if (!file.type.startsWith("image/")) {
-
-                setError(
-                    "Only image files are allowed."
-                );
-
+                setError(`Only image files are allowed: ${file.name}`);
                 return;
             }
 
-
-            // 10 MB
+            // 10 MB maximum
             if (file.size > 10 * 1024 * 1024) {
-
-                setError(
-                    `${file.name} is larger than 10MB.`
-                );
-
+                setError(`${file.name} is larger than 10MB.`);
                 return;
             }
         }
 
+        // Remove old preview URLs
+        previews.forEach((url) => URL.revokeObjectURL(url));
 
         setFiles(selectedFiles);
 
-
-        // Create browser previews
-        const previewUrls =
-            selectedFiles.map((file) =>
-                URL.createObjectURL(file)
-            );
-
+        const previewUrls = selectedFiles.map((file) =>
+            URL.createObjectURL(file)
+        );
 
         setPreviews(previewUrls);
     };
 
-
-    // ------------------------------------
-    // Clean preview URLs
-    // ------------------------------------
+    // =====================================================
+    // CLEAN PREVIEWS
+    // =====================================================
 
     useEffect(() => {
-
         return () => {
-
             previews.forEach((url) => {
                 URL.revokeObjectURL(url);
             });
-
         };
-
     }, [previews]);
 
-
-    // ------------------------------------
-    // Submit product
-    // ------------------------------------
+    // =====================================================
+    // SUBMIT PRODUCT
+    // =====================================================
 
     const handleSubmit = async (e) => {
-
         e.preventDefault();
 
         setError("");
-
         setSuccess("");
 
+        // -------------------------------------------------
+        // USER CHECK
+        // -------------------------------------------------
 
-        // -----------------------------
-        // Basic validation
-        // -----------------------------
+        if (!user) {
+            setError("User information not available. Please login again.");
+            return;
+        }
+
+        // -------------------------------------------------
+        // PRODUCT NAME
+        // -------------------------------------------------
 
         if (!formData.name.trim()) {
-
             setError("Product name is required.");
-
             return;
         }
 
+        // -------------------------------------------------
+        // CATEGORY
+        // -------------------------------------------------
+
+        if (!formData.categoryId) {
+            setError("Please select a category.");
+            return;
+        }
+
+        // -------------------------------------------------
+        // DESCRIPTION
+        // -------------------------------------------------
 
         if (!formData.description.trim()) {
-
             setError("Product description is required.");
-
             return;
         }
 
+        // -------------------------------------------------
+        // MRP
+        // -------------------------------------------------
 
         if (
-            !formData.mrp ||
+            formData.mrp === "" ||
             Number(formData.mrp) <= 0
         ) {
-
-            setError(
-                "MRP must be greater than zero."
-            );
-
+            setError("MRP must be greater than zero.");
             return;
         }
 
+        // -------------------------------------------------
+        // BASE PRICE / SELLING PRICE
+        // -------------------------------------------------
 
         if (
-            !formData.sellingPrice ||
-            Number(formData.sellingPrice) <= 0
+            formData.basePrice === "" ||
+            Number(formData.basePrice) <= 0
         ) {
-
-            setError(
-                "Selling price must be greater than zero."
-            );
-
+            setError("Selling price must be greater than zero.");
             return;
         }
 
-
         if (
-            Number(formData.sellingPrice) >
+            Number(formData.basePrice) >
             Number(formData.mrp)
         ) {
-
-            setError(
-                "Selling price cannot exceed MRP."
-            );
-
+            setError("Selling price cannot exceed MRP.");
             return;
         }
 
+        // -------------------------------------------------
+        // STOCK
+        // -------------------------------------------------
 
         if (
             formData.stock === "" ||
             Number(formData.stock) < 0
         ) {
-
-            setError(
-                "Stock cannot be negative."
-            );
-
+            setError("Stock cannot be negative.");
             return;
         }
 
+        // -------------------------------------------------
+        // IMAGES
+        // -------------------------------------------------
 
-        // SRS minimum 4 images
         if (files.length < 4) {
-
-            setError(
-                "Please upload at least 4 product images."
-            );
-
+            setError("Please upload at least 4 product images.");
             return;
         }
 
+        if (files.length > 8) {
+            setError("Maximum 8 product images are allowed.");
+            return;
+        }
 
         try {
-
             setLoading(true);
 
-
-            // ------------------------------------
-            // Create FormData
-            // ------------------------------------
+            // =================================================
+            // CREATE MULTIPART FORM DATA
+            // =================================================
 
             const multipartData = new FormData();
 
+            // =================================================
+            // PRODUCT JSON
+            //
+            // IMPORTANT:
+            // Backend ProductDTO expects:
+            // basePrice
+            // mrp
+            // categoryId
+            // vendorId
+            // stock
+            // =================================================
 
-            // Product JSON
             const productData = {
-                name: formData.name,
-                category: formData.category,
-                description: formData.description,
+                vendorId: Number(user.id),
+
+                name: formData.name.trim(),
+
+                categoryId: Number(formData.categoryId),
+
+                description: formData.description.trim(),
+
+                basePrice: Number(formData.basePrice),
+
                 mrp: Number(formData.mrp),
-                sellingPrice: Number(
-                    formData.sellingPrice
-                ),
+
                 stock: Number(formData.stock),
+
                 gstRate: Number(formData.gstRate)
             };
 
+            // =================================================
+            // ADD PRODUCT JSON
+            // =================================================
 
             multipartData.append(
                 "product",
-                new Blob(
-                    [
-                        JSON.stringify(productData)
-                    ],
-                    {
-                        type: "application/json"
-                    }
-                )
+                JSON.stringify(productData)
             );
 
-
-            // ------------------------------------
-            // Add multiple images
-            // ------------------------------------
+            // =================================================
+            // ADD IMAGES
+            //
+            // Backend:
+            // @RequestPart("images")
+            // MultipartFile[] images
+            // =================================================
 
             files.forEach((file) => {
-
-                multipartData.append(
-                    "images",
-                    file
-                );
-
+                multipartData.append("images", file);
             });
 
+            // =================================================
+            // API REQUEST
+            // =================================================
 
-            // ------------------------------------
-            // Get JWT token
-            // ------------------------------------
-
-            const token =
-                localStorage.getItem("token");
-
-
-            // ------------------------------------
-            // POST request
-            // ------------------------------------
-
-            const response =
-                await axios.post(
-                    "http://localhost:8080/api/vendor/products",
-                    multipartData,
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${token}`
-                        }
-                    }
-                );
-
+            const response = await API.post(
+                "/vendor/products",
+                multipartData
+            );
 
             console.log(
-                "PRODUCT CREATED:",
+                "PRODUCT CREATED SUCCESSFULLY:",
                 response.data
             );
 
+            // =================================================
+            // SUCCESS
+            // =================================================
 
             setSuccess(
                 "Product submitted successfully for review!"
             );
 
-
             // Reset form
-
             setFormData({
                 name: "",
-                category: "Electronics",
+                categoryId: "",
                 description: "",
                 mrp: "",
-                sellingPrice: "",
+                basePrice: "",
                 stock: "",
                 gstRate: "18"
             });
 
+            // Remove previews
+            previews.forEach((url) => {
+                URL.revokeObjectURL(url);
+            });
 
             setFiles([]);
-
             setPreviews([]);
 
-
+            // Notify VendorManagement
             if (onSuccess) {
                 onSuccess(response.data);
             }
 
-
         } catch (err) {
-
             console.error(
                 "PRODUCT UPLOAD ERROR:",
                 err
             );
 
+            const backendMessage =
+                err.response?.data?.message;
 
-            if (err.response?.data?.message) {
-
-                setError(
-                    err.response.data.message
-                );
-
+            if (backendMessage) {
+                setError(backendMessage);
             } else {
-
                 setError(
                     "Failed to create product. Please try again."
                 );
             }
 
-
         } finally {
-
             setLoading(false);
         }
     };
 
+    // =====================================================
+    // CLOSE MODAL
+    // =====================================================
+
+    const handleClose = () => {
+        if (loading) {
+            return;
+        }
+
+        onClose();
+    };
+
+    // =====================================================
+    // UI
+    // =====================================================
 
     return (
-
         <div className="add-product-overlay">
 
             <div className="add-product-modal">
 
-                <form
-                    onSubmit={handleSubmit}
-                >
+                <form onSubmit={handleSubmit}>
 
-                    <h2>
-                        Add Product Listing
-                    </h2>
+                    <h2>Add Product Listing</h2>
 
-
-                    {/* =================================
-                        Product Name
-                    ================================= */}
+                    {/* =====================================
+                        PRODUCT NAME
+                    ====================================== */}
 
                     <div className="form-group">
 
@@ -411,16 +386,15 @@ const AddProduct = ({ onClose, onSuccess }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            placeholder="e.g. Wireless Ergonomic Mouse"
+                            placeholder="e.g. HP Laptop"
                             required
                         />
 
                     </div>
 
-
-                    {/* =================================
-                        Category
-                    ================================= */}
+                    {/* =====================================
+                        CATEGORY
+                    ====================================== */}
 
                     <div className="form-group">
 
@@ -429,39 +403,43 @@ const AddProduct = ({ onClose, onSuccess }) => {
                         </label>
 
                         <select
-                            name="category"
-                            value={formData.category}
+                            name="categoryId"
+                            value={formData.categoryId}
                             onChange={handleChange}
+                            required
                         >
 
-                            <option value="Electronics">
-                                Electronics (GST 18%)
+                            <option value="">
+                                Select Category
                             </option>
 
-                            <option value="Fashion">
-                                Fashion (GST 12%)
+                            <option value="1">
+                                Electronics
                             </option>
 
-                            <option value="Home">
-                                Home & Kitchen (GST 18%)
+                            <option value="2">
+                                Fashion
                             </option>
 
-                            <option value="Beauty">
-                                Beauty (GST 18%)
+                            <option value="3">
+                                Home & Kitchen
                             </option>
 
-                            <option value="Books">
-                                Books (GST 5%)
+                            <option value="4">
+                                Beauty
+                            </option>
+
+                            <option value="5">
+                                Books
                             </option>
 
                         </select>
 
                     </div>
 
-
-                    {/* =================================
-                        Description
-                    ================================= */}
+                    {/* =====================================
+                        DESCRIPTION
+                    ====================================== */}
 
                     <div className="form-group">
 
@@ -480,10 +458,9 @@ const AddProduct = ({ onClose, onSuccess }) => {
 
                     </div>
 
-
-                    {/* =================================
-                        MRP + Selling Price
-                    ================================= */}
+                    {/* =====================================
+                        MRP + SELLING PRICE
+                    ====================================== */}
 
                     <div className="two-column">
 
@@ -498,30 +475,27 @@ const AddProduct = ({ onClose, onSuccess }) => {
                                 name="mrp"
                                 value={formData.mrp}
                                 onChange={handleChange}
-                                placeholder="1999.00"
-                                min="0"
+                                placeholder="60000"
+                                min="0.01"
                                 step="0.01"
                                 required
                             />
 
                         </div>
 
-
                         <div className="form-group">
 
                             <label>
-                                Selling Base Price (≤ MRP)
+                                Selling Price
                             </label>
 
                             <input
                                 type="number"
-                                name="sellingPrice"
-                                value={
-                                    formData.sellingPrice
-                                }
+                                name="basePrice"
+                                value={formData.basePrice}
                                 onChange={handleChange}
-                                placeholder="1499.00"
-                                min="0"
+                                placeholder="55000"
+                                min="0.01"
                                 step="0.01"
                                 required
                             />
@@ -530,15 +504,14 @@ const AddProduct = ({ onClose, onSuccess }) => {
 
                     </div>
 
-
-                    {/* =================================
-                        Stock
-                    ================================= */}
+                    {/* =====================================
+                        STOCK
+                    ====================================== */}
 
                     <div className="form-group">
 
                         <label>
-                            Initial Stock Quantity (≥ 0)
+                            Initial Stock Quantity
                         </label>
 
                         <input
@@ -546,17 +519,38 @@ const AddProduct = ({ onClose, onSuccess }) => {
                             name="stock"
                             value={formData.stock}
                             onChange={handleChange}
-                            placeholder="50"
+                            placeholder="10"
                             min="0"
+                            step="1"
                             required
                         />
 
                     </div>
 
+                    {/* =====================================
+                        GST
+                    ====================================== */}
 
-                    {/* =================================
-                        IMAGE UPLOAD
-                    ================================= */}
+                    <div className="form-group">
+
+                        <label>
+                            GST Rate
+                        </label>
+
+                        <input
+                            type="number"
+                            name="gstRate"
+                            value={formData.gstRate}
+                            onChange={handleChange}
+                            min="0"
+                            step="0.01"
+                        />
+
+                    </div>
+
+                    {/* =====================================
+                        IMAGES
+                    ====================================== */}
 
                     <div className="form-group">
 
@@ -570,20 +564,14 @@ const AddProduct = ({ onClose, onSuccess }) => {
                             Maximum 8 images.
                         </p>
 
-
                         <input
                             type="file"
                             multiple
                             accept="image/*"
-                            onChange={
-                                handleImageChange
-                            }
+                            onChange={handleImageChange}
                         />
 
-
-                        {/* =================================
-                            Image Preview
-                        ================================= */}
+                        {/* IMAGE PREVIEWS */}
 
                         {previews.length > 0 && (
 
@@ -599,9 +587,7 @@ const AddProduct = ({ onClose, onSuccess }) => {
 
                                             <img
                                                 src={preview}
-                                                alt={
-                                                    `Preview ${index + 1}`
-                                                }
+                                                alt={`Preview ${index + 1}`}
                                             />
 
                                             <span>
@@ -619,10 +605,9 @@ const AddProduct = ({ onClose, onSuccess }) => {
 
                     </div>
 
-
-                    {/* =================================
-                        Error
-                    ================================= */}
+                    {/* =====================================
+                        ERROR
+                    ====================================== */}
 
                     {error && (
 
@@ -632,10 +617,9 @@ const AddProduct = ({ onClose, onSuccess }) => {
 
                     )}
 
-
-                    {/* =================================
-                        Success
-                    ================================= */}
+                    {/* =====================================
+                        SUCCESS
+                    ====================================== */}
 
                     {success && (
 
@@ -645,32 +629,27 @@ const AddProduct = ({ onClose, onSuccess }) => {
 
                     )}
 
-
-                    {/* =================================
-                        Buttons
-                    ================================= */}
+                    {/* =====================================
+                        BUTTONS
+                    ====================================== */}
 
                     <div className="form-actions">
 
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={handleClose}
                             disabled={loading}
                         >
                             Cancel
                         </button>
 
-
                         <button
                             type="submit"
                             disabled={loading}
                         >
-
                             {loading
                                 ? "Uploading..."
-                                : "Submit Listing for Review"
-                            }
-
+                                : "Submit Listing for Review"}
                         </button>
 
                     </div>
@@ -682,6 +661,5 @@ const AddProduct = ({ onClose, onSuccess }) => {
         </div>
     );
 };
-
 
 export default AddProduct;

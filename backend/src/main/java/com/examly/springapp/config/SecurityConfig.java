@@ -1,4 +1,5 @@
 package com.examly.springapp.config;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,40 +18,180 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Autowired
     private JwtAuthenticationFilter jwtAuthFilter;
+
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
+
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // ==========================================
+                // CORS
+                // ==========================================
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
+                )
+
+                // ==========================================
+                // CSRF
+                // ==========================================
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // ==========================================
+                // AUTHORIZATION
+                // ==========================================
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**").permitAll()
+
+                        // ----------------------------------
+                        // Authentication APIs
+                        // ----------------------------------
+                        .requestMatchers(
+                                "/api/auth/**"
+                        ).permitAll()
+
+
+                        // ----------------------------------
+                        // H2 console
+                        // ----------------------------------
+                        .requestMatchers(
+                                "/h2-console/**"
+                        ).permitAll()
+
+
+                        // ----------------------------------
+                        // Uploaded product images
+                        // ----------------------------------
+                        .requestMatchers(
+                                "/uploads/**"
+                        ).permitAll()
+
+
+                        // ----------------------------------
+                        // Public GET APIs
+                        // ----------------------------------
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/products/**",
+                                "/api/categories/**"
+                        ).permitAll()
+
+
+                        // ----------------------------------
+                        // Everything else requires JWT
+                        // ----------------------------------
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+                // ==========================================
+                // STATELESS SESSION
+                // ==========================================
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
+
+                // ==========================================
+                // H2 FRAME OPTIONS
+                // ==========================================
+                .headers(headers ->
+                        headers.frameOptions(frame ->
+                                frame.sameOrigin()
+                        )
+                )
+
+
+                // ==========================================
+                // JWT FILTER
+                // ==========================================
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
 
         return http.build();
     }
+
+
+    // ======================================================
+    // PASSWORD ENCODER
+    // ======================================================
+
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return new BCryptPasswordEncoder();
     }
+
+
+    // ======================================================
+    // CORS CONFIGURATION
+    // ======================================================
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+
+        CorsConfiguration config =
+                new CorsConfiguration();
+
+
+        // Allow frontend
+        config.setAllowedOriginPatterns(
+                List.of("*")
+        );
+
+
+        // HTTP methods
+        config.setAllowedMethods(
+                Arrays.asList(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "OPTIONS",
+                        "PATCH"
+                )
+        );
+
+
+        // Headers
+        config.setAllowedHeaders(
+                Arrays.asList(
+                        "Authorization",
+                        "Content-Type",
+                        "X-Requested-With"
+                )
+        );
+
+
+        // Allow cookies/credentials
         config.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+
+        source.registerCorsConfiguration(
+                "/**",
+                config
+        );
+
+
         return source;
     }
 }
+
