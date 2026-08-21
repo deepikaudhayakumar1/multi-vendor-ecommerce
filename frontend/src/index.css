@@ -698,3 +698,356 @@ a:hover {
     width: 100%;
   }
 }
+
+/* ================================
+   PROFILE PAGE
+================================ */
+
+.profile-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* Profile Header */
+
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+
+  background: linear-gradient(
+    135deg,
+    #202b55,
+    #25204d
+  );
+
+  border: 1px solid rgba(129, 140, 248, 0.35);
+  border-radius: 18px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: linear-gradient(
+    135deg,
+    #6366f1,
+    #a855f7
+  );
+
+  color: white;
+
+  flex-shrink: 0;
+}
+
+.profile-header-info h1 {
+  margin: 0 0 6px;
+  font-size: 2rem;
+}
+
+.profile-header-info p {
+  margin: 0 0 14px;
+  color: #a5b4fc;
+}
+
+/* Badges */
+
+.profile-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+/* Cards */
+
+.profile-card {
+  padding: 28px;
+  margin-bottom: 24px;
+
+  background: #182238;
+
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 18px;
+}
+
+.profile-card h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.profile-section-subtitle {
+  margin: 6px 0 24px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Grid */
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+/* Fields */
+
+.profile-field {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 18px;
+
+  background: #111a2e;
+
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 12px;
+}
+
+.profile-field-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+
+  flex-shrink: 0;
+}
+
+.profile-field div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.profile-field span {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.profile-field strong {
+  font-size: 0.95rem;
+  color: #f8fafc;
+  word-break: break-word;
+}
+
+/* Navbar profile */
+
+.nav-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #f8fafc;
+  text-decoration: none;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  padding: 7px 10px;
+  border-radius: 8px;
+
+  transition: 0.2s ease;
+}
+
+.nav-profile-link:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+  .profile-page {
+    padding: 25px 16px 40px;
+  }
+
+  .profile-header-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-badges {
+    justify-content: center;
+  }
+
+}
+
+/* =========================================================
+   PROFILE EDIT FORM
+   ========================================================= */
+
+.profile-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.profile-form-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.profile-form-field input,
+.profile-form-field textarea,
+.profile-form-field select {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.65);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.profile-form-field input:focus,
+.profile-form-field textarea:focus,
+.profile-form-field select:focus {
+  border-color: #7c6cff;
+  box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.15);
+}
+
+.profile-form-field input::placeholder,
+.profile-form-field textarea::placeholder {
+  color: #94a3b8;
+}
+
+.profile-form-field input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  background: rgba(100, 116, 139, 0.25);
+}
+
+.profile-form-field small {
+  display: block;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   PROFILE GRID
+   ========================================================= */
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  width: 100%;
+}
+
+
+/* =========================================================
+   FULL WIDTH FIELD
+   ========================================================= */
+
+.profile-form-field.full-width {
+  grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   PROFILE EDIT SECTION
+   ========================================================= */
+
+.profile-edit-section {
+  margin-top: 28px;
+}
+
+.profile-edit-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+
+/* =========================================================
+   FORM BUTTONS
+   ========================================================= */
+
+.profile-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .profile-form-field.full-width {
+    grid-column: auto;
+  }
+
+  .profile-form-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+
+  .profile-form-actions button {
+    width: 100%;
+  }
+
+}
