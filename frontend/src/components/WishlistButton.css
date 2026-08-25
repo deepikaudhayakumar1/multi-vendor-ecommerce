@@ -1,0 +1,41 @@
+.wishlist-button {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    color: #555555;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.15);
+
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.wishlist-button:hover {
+    transform: scale(1.08);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.wishlist-button.liked {
+    color: #e91e63;
+}
+
+.wishlist-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}

@@ -6,7 +6,8 @@ import { AuthContext } from '../context/AuthContext';
 import {
   ShoppingBag,
   LogOut,
-  User
+  User,
+  Heart
 } from 'lucide-react';
 
 const NavBar = () => {
@@ -132,7 +133,9 @@ const NavBar = () => {
             </li>
 
 
-            {/* CUSTOMER CART */}
+            {/* =========================================
+                CUSTOMER CART
+               ========================================= */}
 
             {user.role === 'CUSTOMER' && (
 
@@ -154,7 +157,39 @@ const NavBar = () => {
             )}
 
 
-            {/* VENDOR CATALOGUE */}
+            {/* =========================================
+                CUSTOMER WISHLIST
+               ========================================= */}
+
+            {user.role === 'CUSTOMER' && (
+
+              <li>
+
+                <NavLink
+                  to="/wishlist"
+                  className={({ isActive }) =>
+                    isActive
+                      ? 'nav-link nav-active'
+                      : 'nav-link'
+                  }
+                >
+
+                  <Heart size={17} />
+
+                  <span>
+                    Wishlist
+                  </span>
+
+                </NavLink>
+
+              </li>
+
+            )}
+
+
+            {/* =========================================
+                VENDOR CATALOGUE
+               ========================================= */}
 
             {user.role === 'VENDOR' && (
 
@@ -176,7 +211,9 @@ const NavBar = () => {
             )}
 
 
-            {/* ADMIN PANEL */}
+            {/* =========================================
+                ADMIN PANEL
+               ========================================= */}
 
             {(user.role === 'ADMIN' ||
               user.role === 'CATEGORY_MANAGER') && (
@@ -199,7 +236,9 @@ const NavBar = () => {
             )}
 
 
-            {/* FINANCE PANEL */}
+            {/* =========================================
+                FINANCE PANEL
+               ========================================= */}
 
             {user.role === 'FINANCE_OFFICER' && (
 
@@ -221,7 +260,9 @@ const NavBar = () => {
             )}
 
 
-            {/* ANALYTICS */}
+            {/* =========================================
+                ANALYTICS
+               ========================================= */}
 
             <li>
 
@@ -243,6 +284,7 @@ const NavBar = () => {
 
         )}
 
+
       </ul>
 
 
@@ -261,7 +303,9 @@ const NavBar = () => {
             {/* ROLE */}
 
             <span className="badge badge-primary">
+
               {user.role}
+
             </span>
 
 
@@ -335,6 +379,7 @@ const NavBar = () => {
 
         )}
 
+
       </div>
 
 
@@ -345,7 +390,6 @@ const NavBar = () => {
 };
 
 export default NavBar;
-
 
 // import React, { useContext } from 'react';
 // import { NavLink, useNavigate } from 'react-router-dom';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
+import Wishlist from "./pages/Wishlist";
 import { AuthProvider } from './context/AuthContext';
 
 import ErrorBoundary from './components/ErrorBoundary';
@@ -155,6 +155,10 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/wishlist"
+                   element={<Wishlist />}
+                 />
 
               </Routes>
 
